@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>Crickex Live 1–20 Tracker</title>
+  <style>
+    body { font-family: Arial; background: #0d1117; color: white; padding: 20px; }
+    h1 { text-align: center; color: #00ffcc; }
+    .tracker { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; max-width: 400px; margin: 30px auto; }
+    .box { padding: 20px; background: #21262d; border: 2px solid #444; border-radius: 6px; text-align: center; font-size: 18px; }
+    .box.active { background: #28a745; border-color: #34d058; color: #fff; }
+    #info { text-align: center; margin-top: 20px; font-size: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Crickex Live Tracker</h1>
+  <div class="tracker" id="tracker"></div>
+  <div id="info">লোড হচ্ছে…</div>
+
+  <script>
+    // 1–20 ঘর তৈরি
+    const tracker = document.getElementById('tracker');
+    for (let i = 1; i <= 20; i++) {
+      const div = document.createElement('div');
+      div.className = 'box';
+      div.id = 'box-' + i;
+      div.textContent = i;
+      tracker.appendChild(div);
+    }
+
+    async function fetchLive() {
+      try {
+        const res = await fetch('/api/latest');
+        const { result, timestamp } = await res.json();
+
+        document.querySelectorAll('.box').forEach(b => b.classList.remove('active'));
+        const num = parseInt(result, 10);
+        if (num >= 1 && num <= 20) document.getElementById('box-' + num).classList.add('active');
+
+        document.getElementById('info').innerHTML = `
+          সাম্প্রতিক ফল: <b>${result}</b> |
+          আপডেট: ${new Date(timestamp).toLocaleTimeString()}
+        `;
+      } catch (e) {
+        document.getElementById('info').innerText = 'ডেটা লোড করতে সমস্যা হয়েছে!';
+        console.error(e);
+      }
+    }
+
+    fetchLive();
+    setInterval(fetchLive, 7000);
+  </script>
+</body>
+</html>
